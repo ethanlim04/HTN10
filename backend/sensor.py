@@ -59,7 +59,7 @@ class Glasses:
 
 
 
-    def _handle_et_data(et_data: adhawkapi.EyeTrackingStreamData):
+    def _handle_et_data(self, et_data: adhawkapi.EyeTrackingStreamData):
         ''' Handles the latest et data '''
         if et_data.gaze is not None:
             xvec, yvec, zvec, vergence = et_data.gaze
