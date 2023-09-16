@@ -1,5 +1,11 @@
+import math
+import sys
+from PySide2 import QtCore, QtGui, QtWidgets
+#pip install PySide2
+
 import adhawkapi
 import adhawkapi.frontend
+from adhawkapi import MarkerSequenceMode, PacketType
 
 class Glasses:
     def __init__(self, interface) -> None:
@@ -17,7 +23,7 @@ class Glasses:
         self._api.register_stream_handler(adhawkapi.PacketType.EVENTS, self._handle_events)
         self._api.start(tracker_connect_cb=self._handle_tracker_connect,
                         tracker_disconnect_cb=self._handle_tracker_disconnect)
-        
+
 
         # self._video_receiver = adhawkapi.frontend.VideoReceiver()
         # self._video_receiver.frame_received_event.add_callback(self.handle_video_stream)
