@@ -72,7 +72,7 @@ def plot_boxes(results, frame, x, y):
                 cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
                 # ts.translate_text("AA", translator='google', to_language='en')
                 # cv2.putText(frame, class_to_label(labels[i]), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
-                cv2.putText(frame, ts.translate_text(class_to_label(labels[i]), translator='google', to_language='ko'), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
+                cv2.putText(frame, ts.translate_text(class_to_label(labels[i]), translator='google', to_language='fr'), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
 
     return frame
 
