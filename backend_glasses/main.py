@@ -5,7 +5,7 @@ import numpy as np
 import math
 import torch
 import translators as ts
-ts.translate_text("hello", translator='google', to_language='kr')
+ts.translate_text("hello", translator='google', to_language='ko')
 
 #Combined
 # cam_mat = [[1.27488115e+03, 0.00000000e+00, 9.12894051e+02],
@@ -72,7 +72,7 @@ def plot_boxes(results, frame, x, y):
                 cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
                 # ts.translate_text("AA", translator='google', to_language='en')
                 # cv2.putText(frame, class_to_label(labels[i]), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
-                cv2.putText(frame, ts.translate_text(class_to_label(labels[i]), translator='google', to_language='kr'), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
+                cv2.putText(frame, ts.translate_text(class_to_label(labels[i]), translator='google', to_language='ko'), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
 
     return frame
 
