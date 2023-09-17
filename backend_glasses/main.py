@@ -44,14 +44,14 @@ def score_frame(frame):
     labels, cord = results.xyxyn[0][:, -1], results.xyxyn[0][:, :-1]
     return labels, cord
 
-def class_to_label(self, x):
+def class_to_label(x):
     """
     For a given label value, return corresponding string label.
     :param x: numeric label
     :return: corresponding string label
     """
     return classes[int(x)]
-def plot_boxes(results, frame):
+def plot_boxes(results, frame, x, y):
     """
     Takes a frame and its results as input, and plots the bounding boxes and label on to the frame.
     :param results: contains labels and coordinates predicted by model on the given frame.
@@ -66,12 +66,11 @@ def plot_boxes(results, frame):
         if row[4] >= 0.3:
             x1, y1, x2, y2 = int(row[0]*x_shape), int(row[1]*y_shape), int(row[2]*x_shape), int(row[3]*y_shape)
             bgr = (0, 255, 0)
-            cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
-            cv2.putText(frame, class_to_label(labels[i]), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
+            if((x1 <= x and x <= x2 and y1 <= y and y <= y2)):
+                cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
+                cv2.putText(frame, class_to_label(labels[i]), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
 
     return frame
-
-
 
 
 if __name__ == '__main__':
@@ -82,14 +81,19 @@ if __name__ == '__main__':
             res, video = glasses.video.read()
             coords = np.array([glasses.pointer[0], -glasses.pointer[1], -glasses.pointer[2]])
             # if(not (math.isnan(coords[0]) or math.isnan(coords[1]) or math.isnan(coords[2]) or (coords[0] == 0 or coords[1] == 0 or coords[2] == 0))):
+
             try:
                 pts, jac = cv2.projectPoints(coords, np.eye(3), np.array([0.0, 0.0, 0.0]), cam_mat, cam_disort)
                 # print("POINTS", pts)
                 # video = cv2.circle(video, (pts[0][0].astype(int)[0] - 250, pts[0][0].astype(int)[1] - 150), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
-                video = cv2.circle(video, (pts[0][0].astype(int)[0] - 150, pts[0][0].astype(int)[1] - 250), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
+                ptx = pts[0][0].astype(int)[0] - 150
+                pty = pts[0][0].astype(int)[1] - 250
+                if (glasses.wink):
+                    results = score_frame(video)
+                    video = plot_boxes(results, video, ptx, pty)
+                video = cv2.circle(video, (ptx, pty), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
             except:
                 print("Blink")
-                continue
 
 
             # results = score_frame(video)

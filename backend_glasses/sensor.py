@@ -12,7 +12,8 @@ class Glasses:
         self.frame = 0
         self.connected = False
         self.pointer = [0, 0, 0]
-
+        self.wink = False
+        self.lastwink = 0
         self.interface = interface
         self.handle_external_video_stream = None
 
@@ -81,12 +82,18 @@ class Glasses:
         if et_data.pupil_diameter is not None:
             if et_data.eye_mask == adhawkapi.EyeMask.BINOCULAR:
                 rdiameter, ldiameter = et_data.pupil_diameter
-                # print(f'Pupil diameter: Left={ldiameter:.2f} Right={rdiameter:.2f}')
+                print(f'Pupil diameter: Left={ldiameter:.2f} Right={rdiameter:.2f}')
+                if((math.isnan(ldiameter) and not math.isnan(rdiameter)) or (math.isnan(rdiameter) and not math.isnan(ldiameter))):
+                    if(self.frame - self.lastwink > 200):
+                        self.wink = not self.wink
+                        self.lastwink = self.frame
 
         if et_data.imu_quaternion is not None:
             if et_data.eye_mask == adhawkapi.EyeMask.BINOCULAR:
                 x, y, z, w = et_data.imu_quaternion
                 # print(f'IMU: x={x:.2f},y={y:.2f},z={z:.2f},w={w:.2f}')
+        
+        self.frame += 1
 
     def _handle_tracker_disconnect(self):
         print("Tracker disconnected")
