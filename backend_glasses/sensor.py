@@ -27,6 +27,14 @@ class Glasses:
     
         self.video = cv2.VideoCapture(0)
 
+
+        self.evalmode = False
+        self.lasteval = 0
+
+        self.evalCalibrated = False
+        self.calibX = 0
+        self.calibY = 0
+
     def _handle_events(event_type, timestamp, *args):
         if event_type == adhawkapi.Events.BLINK:
             duration = args[0]
@@ -82,7 +90,7 @@ class Glasses:
         if et_data.pupil_diameter is not None:
             if et_data.eye_mask == adhawkapi.EyeMask.BINOCULAR:
                 rdiameter, ldiameter = et_data.pupil_diameter
-                print(f'Pupil diameter: Left={ldiameter:.2f} Right={rdiameter:.2f}')
+                # print(f'Pupil diameter: Left={ldiameter:.2f} Right={rdiameter:.2f}')
                 if((math.isnan(ldiameter) and not math.isnan(rdiameter)) or (math.isnan(rdiameter) and not math.isnan(ldiameter))):
                     if(self.frame - self.lastwink > 200):
                         self.wink = not self.wink

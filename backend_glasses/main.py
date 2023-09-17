@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import math
 import torch
+import translators as ts
+ts.translate_text("hello", translator='google', to_language='kr')
 
 #Combined
 # cam_mat = [[1.27488115e+03, 0.00000000e+00, 9.12894051e+02],
@@ -68,7 +70,9 @@ def plot_boxes(results, frame, x, y):
             bgr = (0, 255, 0)
             if((x1 <= x and x <= x2 and y1 <= y and y <= y2)):
                 cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
-                cv2.putText(frame, class_to_label(labels[i]), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
+                # ts.translate_text("AA", translator='google', to_language='en')
+                # cv2.putText(frame, class_to_label(labels[i]), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
+                cv2.putText(frame, ts.translate_text(class_to_label(labels[i]), translator='google', to_language='kr'), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
 
     return frame
 
@@ -79,27 +83,57 @@ if __name__ == '__main__':
     try:
         while True:
             res, video = glasses.video.read()
+
             coords = np.array([glasses.pointer[0], -glasses.pointer[1], -glasses.pointer[2]])
             # if(not (math.isnan(coords[0]) or math.isnan(coords[1]) or math.isnan(coords[2]) or (coords[0] == 0 or coords[1] == 0 or coords[2] == 0))):
 
-            try:
-                pts, jac = cv2.projectPoints(coords, np.eye(3), np.array([0.0, 0.0, 0.0]), cam_mat, cam_disort)
-                # print("POINTS", pts)
-                # video = cv2.circle(video, (pts[0][0].astype(int)[0] - 250, pts[0][0].astype(int)[1] - 150), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
-                ptx = pts[0][0].astype(int)[0] - 150
-                pty = pts[0][0].astype(int)[1] - 250
-                if (glasses.wink):
-                    results = score_frame(video)
-                    video = plot_boxes(results, video, ptx, pty)
-                video = cv2.circle(video, (ptx, pty), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
-            except:
-                print("Blink")
+            if(not glasses.evalmode):
+                try:
+                    pts, jac = cv2.projectPoints(coords, np.eye(3), np.array([0.0, 0.0, 0.0]), cam_mat, cam_disort)
+                    # print("POINTS", pts)
+                    # video = cv2.circle(video, (pts[0][0].astype(int)[0] - 250, pts[0][0].astype(int)[1] - 150), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
+                    ptx = pts[0][0].astype(int)[0] - 150
+                    pty = pts[0][0].astype(int)[1] - 250
+                    if (glasses.wink):
+                        results = score_frame(video)
+                        video = plot_boxes(results, video, ptx, pty)
+                    video = cv2.circle(video, (ptx, pty), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
+                except:
+                    if(glasses.frame - glasses.lasteval > 100):
+                        print("Eval mode enabled")
+                        glasses.evalmode = True
+                        glasses.lasteval = glasses.frame
+            else:
+                try:
+                    pts, jac = cv2.projectPoints(coords, np.eye(3), np.array([0.0, 0.0, 0.0]), cam_mat, cam_disort)
+                    # print("POINTS", pts)
+                    # video = cv2.circle(video, (pts[0][0].astype(int)[0] - 250, pts[0][0].astype(int)[1] - 150), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
+                    ptx = pts[0][0].astype(int)[0]
+                    pty = pts[0][0].astype(int)[1]
+
+
+                    if(not glasses.evalCalibrated and glasses.frame - glasses.lasteval > 150):
+                        glasses.calibX = ptx
+                        glasses.calibY = pty
+                        glasses.evalCalibrated = True
+                        print("Calibbration Complete")
+                    print(ptx - glasses.calibX, pty - glasses.calibY, glasses.calibX, glasses.calibY)
+                    # video = cv2.circle(video, (450 - glasses.calibX + ptx, 550 - glasses.calibY + pty), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
+                    video = cv2.circle(video, (ptx, pty), radius=20, color=(0, 0, 255), thickness=-1) #gaze (1080p)
+                except:
+                    if(glasses.frame - glasses.lasteval > 100):
+                        print("Eval mode disabled")
+                        glasses.evalmode = False
+                        glasses.evalCalibrated = False
+                        glasses.lasteval = glasses.frame
 
 
             # results = score_frame(video)
             # video = plot_boxes(results, video)
 
             cv2.waitKey(1)
+            
+
             cv2.imshow("stream", video)
 
 
